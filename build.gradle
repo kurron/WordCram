@@ -74,6 +74,22 @@ repositories {
     }
 }
 
+ext {
+    cueVersion = '1.0'
+    junitVersion = '4.8.2'
+    processingVersion = '1.5.1'
+    jsoupVersion = '1.7.2'
+    mockitoVersion = '1.8.5'
+}
+dependencies {
+    compile "com.github.vcl:cue.language:${cueVersion}"
+    compile "org.processing:processing-core:${processingVersion}"
+    compile "org.jsoup:jsoup:${jsoupVersion}"
+
+    testCompile "junit:junit:${junitVersion}"
+    testCompile "org.mockito:mockito-all:${mockitoVersion}"
+}
+
 ext.sharedManifest = manifest {
     attributes( "Implementation-Title": project.name, "Implementation-Version": project.version )
 }
@@ -95,6 +111,19 @@ task sourcesJar(type: Jar, dependsOn: classes) {
 
 artifacts {
     archives sourcesJar
+}
+
+sourceSets {
+    main {
+        java {
+            srcDir 'src'
+        }
+    }
+    test {
+        java {
+            srcDir 'test'
+        }
+    }
 }
 
 if ( isSnapshot )
