@@ -5,3 +5,5 @@ build
 build.json
 target
 .idea/workspace.xml
+.gradle
+out

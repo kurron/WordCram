@@ -1,0 +1,122 @@
+apply plugin: 'java'
+apply plugin: 'maven'
+
+if ( project.properties.containsKey( 'project_version' ) )
+
+{
+    logger.quiet "Using specifed project_version of $project_version"
+    status = 'release'
+}
+else
+{
+    ext.project_version = '1.0.0-SNAPSHOT'
+    logger.quiet "project_version not specified.  Using default version of $project_version"
+    status = 'integration'
+}
+
+project.version = project.project_version
+logger.quiet "version = $project.version"
+
+group = 'org.kurron'
+
+ext.modsUrl = "http://192.168.254.81:81/artifactory/mods-release-local"
+ext.publicationUsername = 'SVNBuild'
+ext.publicationPassword = 'Snoopy*09'
+ext.mavenCentralCacheUrl = "http://192.168.254.81:81/artifactory/repo1-cache"
+ext.codehausCacheUrl = "http://192.168.254.81:81/artifactory/codehaus-cache"
+ext.jbossCacheUrl = "http://192.168.254.81:81/artifactory/jboss-cache"
+ext.springsourceCacheUrl = "http://192.168.254.81:81/artifactory/spring-release"
+ext.springsourceMilestoneCacheUrl = "http://192.168.254.81:81/artifactory/spring-milestone"
+ext.localCacheUrl = "http://192.168.254.81:81/artifactory/ext-release-local"
+ext.localLibsCacheUrl = "http://192.168.254.81:81/artifactory/libs-release-local"
+ext.isSnapshot = version.endsWith("-SNAPSHOT")
+
+repositories {
+    maven {
+        name 'MavenCache'
+        description 'Local Artifactory cache of Maven Central'
+        url = mavenCentralCacheUrl
+    }
+    maven {
+        name 'CodehausCache'
+        description 'Local Artifactory cache of Codehaus'
+        url = codehausCacheUrl
+    }
+    maven {
+        name 'JbossCache'
+        description 'Local Artifactory cache of JBOSS'
+        url = jbossCacheUrl
+    }
+    maven {
+        name 'SpringSourceCache'
+        description 'Local Artifactory cache of SpringSource'
+        url = springsourceCacheUrl
+    }
+    maven {
+        name 'SpringSourceMilestoneCache'
+        description 'Local Artifactory cache of SpringSource milestone builds'
+        url = springsourceMilestoneCacheUrl
+    }
+    maven {
+        name 'LocalReleaseCache'
+        description 'Local repository for third party libraries'
+        url = localCacheUrl
+    }
+    maven {
+        name 'LocalLibsCache'
+        description 'Local repository for third party libraries'
+        url = localLibsCacheUrl
+    }
+    maven {
+        name 'Sush-E'
+        description 'Local Artifactory cache of TL artifacts'
+        url = modsUrl
+    }
+}
+
+ext.sharedManifest = manifest {
+    attributes( "Implementation-Title": project.name, "Implementation-Version": project.version )
+}
+
+jar {
+    manifest = project.manifest {
+        from sharedManifest
+    }
+}
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+    exclude('**/*.properties')
+    manifest = project.manifest {
+        from sharedManifest
+    }
+}
+
+artifacts {
+    archives sourcesJar
+}
+
+if ( isSnapshot )
+{
+    logger.quiet 'Snapshot revision detected. Adding install task to default. Use -Pproject_version=1.2.3 to publish a new version.'
+    defaultTasks.add( 'clean' )
+    defaultTasks.add( 'build' )
+}
+else
+{
+    logger.quiet 'Release revision detected. Adding uploadArchives to default tasks.'
+    uploadArchives {
+        repositories {
+            maven {
+                description 'Where to publish artifacts to.'
+                url = modsUrl
+                credentials {
+                    username = publicationUsername
+                    password = publicationPassword
+                }
+            }
+        }
+    }
+    defaultTasks.add( 'uploadArchives' )
+}
