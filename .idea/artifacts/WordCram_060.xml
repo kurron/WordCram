@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" build-on-make="true" name="WordCram-060">
+    <output-path>$PROJECT_DIR$/out/artifacts/WordCram_060</output-path>
+    <root id="archive" name="WordCram-060.jar">
+      <element id="module-output" name="WordCram" />
+    </root>
+  </artifact>
+</component>
