@@ -190,6 +190,16 @@ public class WordCram {
     }
 
     /**
+     * Enables right-to-left text rendering, overriding any previously calculated RTL value.
+     * @return The WordCram, for further setup or drawing.
+     */
+    public WordCram withRTL()
+    {
+        renderOptions.rightToLeft = true;
+        return this;
+    }
+
+    /**
      * Tells WordCram which words to ignore when it counts up the words in your text.
      * These words won't show up in the image.
      * <p>
